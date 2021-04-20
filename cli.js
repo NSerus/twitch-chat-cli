@@ -6,9 +6,6 @@ const chalk = require('chalk')
 const program = require('commander')
 const ora = require('ora')
 const fetch = require('node-fetch')
-const request = require('request-promise')
-const Promise = require('bluebird')
-const writeFile = Promise.promisify(fs.writeFile)
 const rimraf = require('rimraf')
 
 const config = require('./config')
@@ -37,34 +34,6 @@ const fetchEmotes = async (channel, emotes, isGlobal) => {
   const spinner = ora(msg)
   spinner.start()
 
-  // make sure all images have been fetched before continuing
-  try {
-    await Promise.all(
-      emotes.map(async emote => {
-        const { id } = emote
-        const dest = path.join(IMAGES_DIR, `${id}.png`)
-        const url = `https://static-cdn.jtvnw.net/emoticons/v1/${id}/2.0`
-        try {
-          const data = await request({
-            url,
-            encoding: null
-          })
-          const buf = Buffer.from(data, 'utf8')
-          await writeFile(dest, buf)
-        } catch (err) {
-          console.error(`error fetching ${url}`)
-        }
-      })
-    )
-  } catch (err) {
-    console.error(err.msg)
-    const failMsg = isGlobal
-      ? 'Failed to fetch global emotes'
-      : 'Failed to fetch channel emotes'
-    spinner.fail(failMsg)
-    return false
-  }
-
   spinner.succeed()
   return true
 }
@@ -92,9 +61,9 @@ const handleConnect = async channel => {
   fs.ensureDirSync(EMOTICON_DIR)
   fs.ensureDirSync(IMAGES_DIR)
 
-  let spinner = ora('Checking for emoticon api.')
+  let spinner = ora('')
   spinner.start()
-  const failMsg = 'No emoticon api found. Emotes will be displayed as text.'
+  const failMsg = 'Emotes will be displayed as text.'
   let api = false
 
   try {
@@ -104,10 +73,10 @@ const handleConnect = async channel => {
       spinner.succeed()
       api = true
     } else {
-      spinner.fail(failMsg)
+      spinner.succeed(failMsg)
     }
   } catch (e) {
-    spinner.fail(failMsg)
+    spinner.succeed(failMsg)
   }
 
   let globalEmotes

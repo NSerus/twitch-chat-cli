@@ -9,7 +9,6 @@ const fetch = require('node-fetch')
 const request = require('request-promise')
 const Promise = require('bluebird')
 const writeFile = Promise.promisify(fs.writeFile)
-const termImg = require('term-img')
 const rimraf = require('rimraf')
 
 const config = require('./config')
@@ -74,9 +73,6 @@ const createEmoteMap = emoteList => {
   const map = {}
   emoteList.forEach(emotes => {
     emotes.forEach(emote => {
-      const { id, code } = emote
-      const img = termImg.string(path.join(IMAGES_DIR, `${id}.png`))
-      map[code] = img
     })
   })
 
@@ -96,7 +92,7 @@ const handleConnect = async channel => {
   fs.ensureDirSync(EMOTICON_DIR)
   fs.ensureDirSync(IMAGES_DIR)
 
-  let spinner = ora(`Checking for emoticon api.`)
+  let spinner = ora('Checking for emoticon api.')
   spinner.start()
   const failMsg = 'No emoticon api found. Emotes will be displayed as text.'
   let api = false
